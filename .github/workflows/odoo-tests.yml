@@ -30,6 +30,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Run client unit and HTTP integration tests
+        run: npm run test:client
+
+      - name: Run pure domain unit tests
+        run: |
+          docker run --rm --entrypoint python3 \
+            -v "${GITHUB_WORKSPACE}/addons/netpulse:/app" -w /app \
+            odoo:17.0 -m unittest discover -s tests/unit -p 'test_*.py'
+
       - name: Run Odoo 17 module tests
         run: |
           docker run --rm --network host \
