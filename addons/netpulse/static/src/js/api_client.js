@@ -7,6 +7,7 @@ export class NetpulseApiClient {
         this.baseUrl = baseUrl;
         this.fetchImplementation = fetchImplementation;
         this.accessToken = null;
+        this.currentUser = null;
     }
 
     async request(path, options = {}) {
@@ -31,6 +32,7 @@ export class NetpulseApiClient {
 
         if (response.status === 401) {
             this.accessToken = null;
+            this.currentUser = null;
             const error = new Error(
                 "Tu sesión expiró. Inicia sesión nuevamente."
             );
@@ -60,7 +62,8 @@ export class NetpulseApiClient {
             body: JSON.stringify({ login, password }),
         });
         this.accessToken = payload.access_token;
-        return payload.user;
+        this.currentUser = payload.user;
+        return this.currentUser;
     }
 
     listIncidents() {
@@ -87,6 +90,7 @@ export class NetpulseApiClient {
 
     logout() {
         this.accessToken = null;
+        this.currentUser = null;
     }
 }
 
