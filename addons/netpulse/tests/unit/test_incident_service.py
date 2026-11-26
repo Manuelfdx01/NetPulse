@@ -2,11 +2,11 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-from netpulse.application.incident_service import (
+from netpulse_core.application.incident_service import (
     IncidentApplicationService,
     IncidentNotFound,
 )
-from netpulse.domain.incident_rules import InvalidTransition
+from netpulse_core.domain.incident_rules import InvalidTransition
 
 
 class TestIncidentApplicationService(unittest.TestCase):
