@@ -20,6 +20,9 @@
 
     <menuitem id="menu_netpulse_config" name="Configuración" parent="menu_netpulse_root"
               sequence="90" groups="group_netpulse_admin"/>
+    <menuitem id="menu_netpulse_create_user" name="Crear usuario"
+              parent="menu_netpulse_config" action="action_netpulse_create_user" sequence="10"
+              groups="group_netpulse_admin"/>
     <menuitem id="menu_netpulse_sync" name="Sincronizar con GNS3" parent="menu_netpulse_config"
-              action="action_netpulse_sync_gns3" sequence="10"/>
+              action="action_netpulse_sync_gns3" sequence="20"/>
 </odoo>
