@@ -1,6 +1,6 @@
 # Evidencia de depuración — Prototipo 2
 
-Este documento es una plantilla para registrar la depuración real. Debe completarse durante la ejecución local; no se deben inventar valores observados ni afirmar que un breakpoint se alcanzó sin haberlo ejecutado.
+Este documento contiene las ubicaciones verificadas en el commit de CI aprobado `920c02c37183931a9bcb096d20607e970ee4133e`. Las columnas de valores observados y capturas deben completarse durante la ejecución real en Odoo; no se deben inventar resultados.
 
 ## Flujos obligatorios
 
@@ -10,22 +10,22 @@ Este documento es una plantilla para registrar la depuración real. Debe complet
 
 ## Inventario de breakpoints
 
-Registrar al menos diez puntos entre cliente y backend. Incluir un breakpoint condicional y un logpoint.
+Los números corresponden al commit indicado arriba. Si se cambia el código, hay que volver a comprobar las líneas antes de tomar las capturas.
 
-| N.º | Flujo | Capa | Archivo y línea real | Tipo (normal/condicional/logpoint) | Valor esperado | Valor observado |
+| N.º | Flujo | Capa | Archivo y línea verificada | Tipo y configuración | Valor esperado | Valor observado |
 |---:|---|---|---|---|---|---|
-| 1 | Login | OWL | `static/src/js/netpulse_client.js` — método `login` | Normal | Login enviado una vez | Por completar |
-| 2 | Login | Cliente HTTP | `static/src/js/api_client.js` — método `login` | Normal | POST a `/auth/login` | Por completar |
-| 3 | Login | Cliente HTTP | `static/src/js/api_client.js` — método `request` | Condicional: respuesta 401 o 200 | Código HTTP esperado | Por completar |
-| 4 | Login | Backend | `controllers/api.py` — método `login` | Normal | Login y usuario localizado | Por completar |
-| 5 | Login | Backend | `services/jwt_service.py` — método `issue_token` | Normal | `sub`, `iat`, `exp` coherentes | Por completar |
-| 6 | Crear | OWL | `static/src/js/netpulse_client.js` — método `createIncident` | Logpoint | ID de dispositivo enviado | Por completar |
-| 7 | Crear | Backend | `controllers/api.py` — método `create_incident` | Normal | Payload validado | Por completar |
-| 8 | Crear | Aplicación | `application/incident_service.py` — método `create_incident` | Normal | Rol y valores seguros | Por completar |
-| 9 | Crear | Persistencia | `services/odoo_incident_repository.py` — método `create` | Normal | Registro persistido | Por completar |
-| 10 | 403 | Backend | `services/odoo_incident_repository.py` — método `get` | Normal | Regla de acceso rechaza el registro ajeno | Por completar |
+| 1 | Login | OWL | `addons/netpulse/static/src/js/netpulse_client.js:30` | Normal, entrada a `login()` | Usuario y contraseña ingresados; ejecución una vez | Por completar |
+| 2 | Login | Cliente HTTP | `addons/netpulse/static/src/js/api_client.js:59` | Normal, entrada a `api.login()` | POST a `/auth/login` con el cuerpo esperado | Por completar |
+| 3 | Login | Cliente HTTP | `addons/netpulse/static/src/js/api_client.js:33` | **Condicional:** `response.status === 401 || response.status === 200` | Detenerse solo ante login aceptado o rechazado | Por completar |
+| 4 | Login | Backend | `addons/netpulse/controllers/api.py:89` | Normal, entrada al controlador | Login recibido y usuario activo localizado | Por completar |
+| 5 | Login | JWT | `addons/netpulse_core/jwt_service.py:47` | Normal, emisión del token | `sub`, `iat` y `exp` coherentes; TTL de 1800 s | Por completar |
+| 6 | Crear | OWL | `addons/netpulse/static/src/js/netpulse_client.js:85` | **Logpoint:** `[NetPulse] crear incidencia`, `{ deviceId: this.state.deviceId, user: this.state.user?.login }` | Identificador de dispositivo y usuario antes del POST | Por completar |
+| 7 | Crear | Backend | `addons/netpulse/controllers/api.py:211` | Normal, entrada a `create_incident()` | Petición autenticada y payload JSON recibido | Por completar |
+| 8 | Crear | Aplicación | `addons/netpulse_core/application/incident_service.py:21` | Normal, entrada a `create_incident()` | Rol, identificador y valores validados | Por completar |
+| 9 | Crear | Persistencia | `addons/netpulse/services/odoo_incident_repository.py:9` | Normal, entrada a `create()` | Valores seguros enviados al ORM | Por completar |
+| 10 | 403 | Persistencia/seguridad | `addons/netpulse/services/odoo_incident_repository.py:14` | Normal, entrada a `get()` para incidencia ajena | La regla de registro rechaza la lectura | Por completar |
 
-> Las líneas pueden cambiar entre commits. Antes de entregar, sustituir cada referencia por el número de línea real del commit que se etiqueta como `v0.2.0`.
+> En el logpoint de la fila 6, configurar el mensaje indicado en las herramientas de desarrollo del navegador/depurador, sin modificar el código fuente. La fila 10 debe ejecutarse con el token de un técnico distinto al propietario de la incidencia.
 
 ## Registro de cada parada
 
@@ -39,7 +39,7 @@ Para cada breakpoint, guardar:
 
 ## Depuración de una prueba automatizada
 
-Ejecutar en modo debug una prueba HTTP de producción, por ejemplo:
+Ejecutar en modo debug una prueba HTTP real, por ejemplo:
 
 ```bash
 docker compose run --rm odoo odoo \
