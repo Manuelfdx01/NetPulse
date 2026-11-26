@@ -3,108 +3,20 @@
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 
-let accessToken = null;
-
-class NetpulseApiClient {
-    constructor() {
-        this.baseUrl = "/api/v1";
-    }
-
-    async request(path, options = {}) {
-        const headers = new Headers(options.headers || {});
-        headers.set("Accept", "application/json");
-
-        if (options.body) {
-            headers.set("Content-Type", "application/json");
-        }
-        if (accessToken) {
-            headers.set("Authorization", `Bearer ${accessToken}`);
-        }
-
-        const response = await fetch(`${this.baseUrl}${path}`, {
-            ...options,
-            headers,
-        });
-        const payload = await response.json().catch(() => ({}));
-
-        if (response.status === 401) {
-            accessToken = null;
-            const error = new Error("Tu sesión expiró. Inicia sesión nuevamente.");
-            error.status = 401;
-            throw error;
-        }
-        if (response.status === 403) {
-            const error = new Error("No tienes permisos para realizar esta acción.");
-            error.status = 403;
-            throw error;
-        }
-        if (!response.ok) {
-            const error = new Error(payload.message || "No fue posible completar la solicitud.");
-            error.status = response.status;
-            throw error;
-        }
-        return payload;
-    }
-
-    async login(login, password) {
-        const payload = await this.request("/auth/login", {
-            method: "POST",
-            body: JSON.stringify({ login, password }),
-        });
-        accessToken = payload.access_token;
-        return payload.user;
-    }
-
-    listIncidents() {
-        return this.request("/incidents");
-    }
-
-    getIncident(id) {
-        return this.request(`/incidents/${id}`);
-    }
-
-    createIncident(values) {
-        return this.request("/incidents", {
-            method: "POST",
-            body: JSON.stringify(values),
-        });
-    }
-
-    updateState(id, state) {
-        return this.request(`/incidents/${id}/state`, {
-            method: "PATCH",
-            body: JSON.stringify({ state }),
-        });
-    }
-
-    logout() {
-        accessToken = null;
-    }
-}
-
-const api = new NetpulseApiClient();
+import { api } from "./api_client";
+import { createInitialIncidentState, resolveIncidentListState } from "./presentation_state";
 
 export class NetpulseIncidentClient extends Component {
     static template = "netpulse.NetpulseIncidentClient";
 
     setup() {
-        this.state = useState({
-            login: "",
-            password: "",
-            user: null,
-            incidents: [],
-            selectedIncident: null,
-            deviceId: "",
-            description: "",
-            rootCause: "",
-            loading: false,
-            submitting: false,
-            error: "",
-            notice: "",
-            showCreateForm: false,
-        });
+        this.state = useState(createInitialIncidentState());
 
         onWillStart(() => this.loadIncidentsIfAuthenticated());
+    }
+
+    get incidentListState() {
+        return resolveIncidentListState(this.state);
     }
 
     async loadIncidentsIfAuthenticated() {
