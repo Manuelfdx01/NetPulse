@@ -23,7 +23,7 @@ Los números corresponden al commit indicado arriba. Si se cambia el código, ha
 | 7 | Crear | Backend | `addons/netpulse/controllers/api.py:211` | Normal, entrada a `create_incident()` | Petición autenticada y payload JSON recibido | Por completar |
 | 8 | Crear | Aplicación | `addons/netpulse_core/application/incident_service.py:21` | Normal, entrada a `create_incident()` | Rol, identificador y valores validados | Por completar |
 | 9 | Crear | Persistencia | `addons/netpulse/services/odoo_incident_repository.py:9` | Normal, entrada a `create()` | Valores seguros enviados al ORM | Por completar |
-| 10 | 403 | Persistencia/seguridad | `addons/netpulse/services/odoo_incident_repository.py:14` | Normal, entrada a `get()` para incidencia ajena | La regla de registro rechaza la lectura | Por completar |
+| 10 | 403 | Persistencia/seguridad | `addons/netpulse/services/odoo_incident_repository.py:21` | Normal, en `check_access_rule("read")` tras entrar a `get()` | La regla de registro rechaza la lectura de la incidencia ajena | Por completar |
 
 > En el logpoint de la fila 6, configurar el mensaje indicado en las herramientas de desarrollo del navegador/depurador, sin modificar el código fuente. La fila 10 debe ejecutarse con el token de un técnico distinto al propietario de la incidencia.
 
