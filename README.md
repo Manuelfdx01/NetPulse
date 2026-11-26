@@ -44,14 +44,17 @@ Pruebas automáticas del módulo (en una base aparte):
 | `GNS3_URL`, `GNS3_PROJECT_ID` | Servidor y proyecto GNS3 a monitorear |
 | `GNS3_USER`, `GNS3_PASSWORD` | Opcionales, si su GNS3 exige autenticación |
 
-## Roles
+## Roles y administración de usuarios
 | Rol | Puede |
 |---|---|
-| **Administrador** | Todo: dashboard, topología, CRUD de dispositivos e incidencias, asignar técnico y prioridad, sincronizar con GNS3 |
-| **Técnico** | Ver dispositivos; ver, crear y atender **solo sus** incidencias; no elimina ni reasigna ni cambia prioridad |
+| **Administrador** | Dashboard, topología, CRUD de dispositivos e incidencias, asignar técnicos, cambiar prioridad, sincronizar con GNS3 y crear usuarios Administrador/Técnico |
+| **Técnico** | Consultar dispositivos; consultar, crear y atender sus propias incidencias. No puede asignar, cambiar prioridad, cambiar el origen ni eliminar dispositivos/incidencias |
 
-Cree el usuario técnico en Ajustes → Usuarios (el de demostración `tecnico@netpulse.local` viene **sin contraseña**:
-asígnela con Acción → Cambiar contraseña).
+La asignación de una incidencia valida en el servidor que el usuario seleccionado tenga rol Técnico y no sea administrador. Al crear incidencias, el sistema fuerza los valores seguros según el rol; un técnico queda como responsable de su propia incidencia, que comienza Pendiente, con prioridad Media y origen Manual.
+
+Los administradores pueden crear cuentas desde **NetPulse → Configuración → Crear usuario**. El formulario permite elegir el rol Administrador o Técnico y establecer una contraseña inicial de al menos 10 caracteres. El identificador de acceso debe ser único. El asistente solo está disponible para administradores de NetPulse.
+
+El usuario técnico de demostración `tecnico@netpulse.local` viene **sin contraseña**: asígnela desde Ajustes → Usuarios → Acción → Cambiar contraseña, o cree una cuenta nueva desde NetPulse.
 
 ## Guion de demostración (5 minutos)
 1. **Dashboard / Topología:** dispositivos verdes (activos) y rojos (caídos).
