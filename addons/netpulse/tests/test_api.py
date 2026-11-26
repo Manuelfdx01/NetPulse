@@ -94,7 +94,6 @@ class TestNetpulseHttpApi(HttpCase):
     def test_invalid_incident_payload_returns_400(self):
         response = self._request(
             "/api/v1/incidents",
-            method="POST",
             token=self._token(),
             payload={"device_id": "no-es-un-entero"},
         )
