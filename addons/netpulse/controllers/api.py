@@ -179,6 +179,8 @@ class NetpulseApiController(http.Controller):
                     {"error": "not_found", "message": _("Incidencia inexistente.")},
                     404,
                 )
+            incident.check_access_rights("read")
+            incident.check_access_rule("read")
             return self._response({
                 "id": incident.id,
                 "name": incident.name,
