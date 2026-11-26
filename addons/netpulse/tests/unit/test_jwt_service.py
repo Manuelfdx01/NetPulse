@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from odoo.exceptions import AccessDenied
-from netpulse.services.jwt_service import NetpulseJwtService
+from netpulse_core.jwt_service import NetpulseJwtService
 
 
 class FakeUsers:
