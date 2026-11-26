@@ -1,3 +1,5 @@
+/** @odoo-module **/
+
 /** Funciones puras para representar los estados de la lista de incidencias. */
 
 export function createInitialIncidentState() {
