@@ -20,12 +20,11 @@ docker run --rm \
     npm run test:client
 
 echo "==> Pruebas unitarias del dominio y aplicación + cobertura"
-docker compose run --rm \
-    --user root \
-    --entrypoint bash \
-    --workdir /mnt/extra-addons \
-    odoo \
-    -lc "python3 -m pip install coverage==7.6.1 && PYTHONPATH=/mnt/extra-addons python3 -m coverage run --source=netpulse_core.domain,netpulse_core.application -m unittest discover -s netpulse/tests/unit -p 'test_*.py' && python3 -m coverage report --include='netpulse_core/domain/*,netpulse_core/application/*' --fail-under=70 && python3 -m coverage html --include='netpulse_core/domain/*,netpulse_core/application/*' -d /mnt/extra-addons/netpulse/coverage_html"
+docker run --rm --user root \
+    -v "$ROOT_DIR/addons:/app" \
+    -w /app \
+    python:3.12-slim \
+    bash -lc "pip install coverage==7.6.1 && PYTHONPATH=/app python -m coverage run --source=netpulse_core.domain,netpulse_core.application -m unittest discover -s netpulse/tests/unit -p 'test_*.py' && python -m coverage report --include='netpulse_core/domain/*,netpulse_core/application/*' --fail-under=70 && python -m coverage html --include='netpulse_core/domain/*,netpulse_core/application/*' -d /app/netpulse/coverage_html"
 
 echo "==> Pruebas ORM e integración HTTP de Odoo"
 docker compose run --rm odoo \
