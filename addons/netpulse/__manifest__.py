@@ -15,6 +15,7 @@
         "data/cron.xml",
         "views/device_views.xml",
         "views/incident_views.xml",
+        "views/user_wizard_views.xml",
         "views/menus.xml",
     ],
     "demo": ["demo/demo.xml"],
