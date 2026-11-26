@@ -7,8 +7,12 @@ from odoo.exceptions import AccessDenied, AccessError, MissingError, UserError, 
 from odoo.http import request
 from werkzeug.wrappers import Response
 
-from ..domain.incident_rules import validate_device_identifier
+from ..application.incident_service import (
+    IncidentApplicationService,
+    IncidentNotFound,
+)
 from ..services.jwt_service import NetpulseJwtService
+from ..services.odoo_incident_repository import OdooIncidentRepository
 
 _logger = logging.getLogger(__name__)
 
@@ -60,7 +64,7 @@ class NetpulseApiController(http.Controller):
             return NetpulseApiController._response(
                 {"error": "forbidden", "message": str(error)}, 403
             )
-        if isinstance(error, MissingError):
+        if isinstance(error, (IncidentNotFound, MissingError)):
             return NetpulseApiController._response(
                 {"error": "not_found", "message": str(error)}, 404
             )
@@ -211,19 +215,16 @@ class NetpulseApiController(http.Controller):
                 raise ValidationError(
                     _("Campos no permitidos: %s") % ", ".join(sorted(unexpected))
                 )
-            try:
-                validate_device_identifier(payload.get("device_id"))
-            except ValueError as exc:
-                raise ValidationError(_(str(exc))) from exc
-
             values = {
                 key: value
                 for key, value in payload.items()
                 if key in allowed_fields
             }
-            incident = request.env["netpulse.incident"].with_user(user).create(
-                values
+            role = "admin" if user.has_group(ADMIN_GROUP) else "technician"
+            service = IncidentApplicationService(
+                OdooIncidentRepository(request.env, user)
             )
+            incident = service.create_incident(role, values, user.id)
             return self._response(
                 {"id": incident.id, "name": incident.name},
                 201,
@@ -247,15 +248,10 @@ class NetpulseApiController(http.Controller):
             if state not in {"in_progress", "resolved"}:
                 raise ValidationError(_("El estado solicitado no es válido."))
 
-            incident = request.env["netpulse.incident"].with_user(user).browse(
-                incident_id
-            ).exists()
-            if not incident:
-                return self._response(
-                    {"error": "not_found", "message": _("Incidencia inexistente.")},
-                    404,
-                )
-            incident.write({"state": state})
+            service = IncidentApplicationService(
+                OdooIncidentRepository(request.env, user)
+            )
+            incident = service.advance_state(incident_id, state)
             return self._response({
                 "id": incident.id,
                 "state": incident.state,
