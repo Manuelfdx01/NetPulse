@@ -1,5 +1,7 @@
 import json
 
+import requests
+
 from odoo.tests.common import HttpCase, tagged
 
 
@@ -45,10 +47,18 @@ class TestNetpulseHttpApi(HttpCase):
         self.assertEqual(response.status_code, 200)
         return response.json()["access_token"]
 
-    def _request(self, path, token=None, payload=None):
+    def _request(self, path, token=None, payload=None, method="GET"):
         headers = {"Content-Type": "application/json"}
         if token:
             headers["Authorization"] = "Bearer %s" % token
+
+        if method == "PATCH":
+            return requests.patch(
+                self.base_url() + path,
+                json=payload,
+                headers=headers,
+                timeout=10,
+            )
 
         data = json.dumps(payload) if payload is not None else None
         return self.url_open(path, data=data, headers=headers)
@@ -123,3 +133,28 @@ class TestNetpulseHttpApi(HttpCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"], "not_found")
+
+    def test_technician_can_advance_own_incident(self):
+        incident = self.env["netpulse.incident"].create({
+            "device_id": self.device.id,
+            "technician_id": self.technician.id,
+        })
+        token = self._token()
+
+        started = self._request(
+            "/api/v1/incidents/%s/state" % incident.id,
+            token=token,
+            payload={"state": "in_progress"},
+            method="PATCH",
+        )
+        self.assertEqual(started.status_code, 200)
+        self.assertEqual(started.json()["state"], "in_progress")
+
+        resolved = self._request(
+            "/api/v1/incidents/%s/state" % incident.id,
+            token=token,
+            payload={"state": "resolved"},
+            method="PATCH",
+        )
+        self.assertEqual(resolved.status_code, 200)
+        self.assertEqual(resolved.json()["state"], "resolved")
