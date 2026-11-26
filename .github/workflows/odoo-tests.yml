@@ -38,13 +38,19 @@ jobs:
       - name: Run client unit and HTTP integration tests
         run: npm run test:client
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install coverage
+        run: python -m pip install coverage==7.6.1
+
       - name: Run domain and application tests with coverage
         run: |
-          docker run --rm --user root --entrypoint bash \
-            -v "${GITHUB_WORKSPACE}/addons:/mnt/extra-addons" \
-            -w /mnt/extra-addons \
-            odoo:17.0 -lc "python3 -m pip install coverage==7.6.1 && PYTHONPATH=/mnt/extra-addons python3 -m coverage run --source=netpulse_core.domain,netpulse_core.application -m unittest discover -s netpulse/tests/unit -p 'test_*.py' && python3 -m coverage report --include='netpulse_core/domain/*,netpulse_core/application/*' --fail-under=70 && python3 -m coverage html --include='netpulse_core/domain/*,netpulse_core/application/*' -d /mnt/extra-addons/netpulse/coverage_html"
-
+          PYTHONPATH=addons python -m coverage run --source=netpulse_core.domain,netpulse_core.application -m unittest discover -s addons/netpulse/tests/unit -p 'test_*.py'
+          python -m coverage report --include='netpulse_core/domain/*,netpulse_core/application/*' --fail-under=70
+          python -m coverage html --include='netpulse_core/domain/*,netpulse_core/application/*' -d addons/netpulse/coverage_html
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
