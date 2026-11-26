@@ -11,7 +11,7 @@ info:
     - Todas las operaciones usan un único endpoint `POST /jsonrpc` (JSON-RPC 2.0). Lo que cambia es `params.service`, `params.method` y `params.args`.
     - Las respuestas viajan con HTTP 200 incluso cuando hay error; el error está en el cuerpo (`error.data.name`).
     - Equivalencias: `odoo.exceptions.AccessDenied` ≈ 401 (no autenticado), `odoo.exceptions.AccessError` ≈ 403 (sin permiso), `odoo.exceptions.ValidationError` ≈ 400 (datos inválidos).
-    - La credencial es una **API key** de Odoo (se crea en Preferencias > Seguridad de la cuenta). En JSON-RPC se envía como argumento `password`/`api_key` dentro de `params.args`; el esquema `bearerAuth` se declara para documentar ese uso (en versiones nuevas de Odoo se envía como `Authorization: Bearer`).
+    - La credencial es una **API key** de Odoo (se crea en Preferencias > Seguridad de la cuenta). En JSON-RPC se envía como argumento `password`/`api_key` dentro de `params.args`; no se declara ni se utiliza `bearerAuth` en esta especificación.
     - Las contraseñas y las API keys se almacenan con hash en Odoo.
 servers:
   - url: http://localhost:8069
