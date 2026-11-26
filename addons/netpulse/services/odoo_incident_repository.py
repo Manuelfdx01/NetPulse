@@ -15,8 +15,9 @@ class OdooIncidentRepository:
         incident = self._environment["netpulse.incident"].with_user(
             self._user
         ).browse(incident_id).exists()
-        if incident:
-            incident.check_access_rule("read")
+        if not incident:
+            return None
+        incident.check_access_rule("read")
         return incident
 
     def update_state(self, incident_id, state):
