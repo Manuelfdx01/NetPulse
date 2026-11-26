@@ -7,11 +7,11 @@ from odoo.exceptions import AccessDenied, AccessError, MissingError, UserError, 
 from odoo.http import request
 from werkzeug.wrappers import Response
 
-from ..application.incident_service import (
+from netpulse_core.application.incident_service import (
     IncidentApplicationService,
     IncidentNotFound,
 )
-from ..services.jwt_service import NetpulseJwtService
+from netpulse_core.jwt_service import InvalidToken, NetpulseJwtService
 from ..services.odoo_incident_repository import OdooIncidentRepository
 
 _logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class NetpulseApiController(http.Controller):
 
     @staticmethod
     def _handle_error(error):
-        if isinstance(error, AccessDenied):
+        if isinstance(error, (AccessDenied, InvalidToken)):
             return NetpulseApiController._response(
                 {"error": "unauthorized", "message": str(error)}, 401
             )
