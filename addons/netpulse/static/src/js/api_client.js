@@ -1,3 +1,5 @@
+/** @odoo-module **/
+
 /** Cliente HTTP independiente de la interfaz OWL. */
 
 export class NetpulseApiClient {
