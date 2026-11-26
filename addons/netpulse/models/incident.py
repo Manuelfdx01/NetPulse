@@ -2,6 +2,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
 ADMIN_GROUP = "netpulse.group_netpulse_admin"
+TECHNICIAN_GROUP = "netpulse.group_netpulse_technician"
 
 
 class NetpulseIncident(models.Model):
@@ -82,6 +83,17 @@ class NetpulseIncident(models.Model):
             if rec.state in ("in_progress", "resolved") and not rec.technician_id:
                 raise ValidationError(_("Asigne un técnico antes de atender o resolver la incidencia."))
 
+    @api.constrains("technician_id")
+    def _check_assigned_user_is_technician(self):
+        for rec in self:
+            user = rec.technician_id
+            if user and (
+                not user.has_group(TECHNICIAN_GROUP)
+                or user.has_group(ADMIN_GROUP)
+            ):
+                raise ValidationError(_("La incidencia solo puede asignarse a un usuario con rol Técnico."))
+
+
     # ------------------------------------------------------------------
     # CRUD con reglas de negocio
     # ------------------------------------------------------------------
@@ -91,26 +103,38 @@ class NetpulseIncident(models.Model):
         for vals in vals_list:
             if not vals.get("name") or vals["name"] == _("Nuevo"):
                 vals["name"] = self.env["ir.sequence"].sudo().next_by_code("netpulse.incident") or _("Nuevo")
-            # Un técnico que registra una incidencia manual queda como responsable.
-            if not is_admin and not vals.get("technician_id"):
-                vals["technician_id"] = self.env.uid
+            # El técnico solo puede registrar incidencias manuales propias y pendientes.
+            # Se fuerzan estos valores para impedir elevar prioridad, falsificar el origen,
+            # asignar a terceros o crear incidencias directamente resueltas.
+            if not is_admin:
+                vals.update({
+                    "technician_id": self.env.uid,
+                    "priority": "1",
+                    "state": "pending",
+                    "origin": "manual",
+                    "date_resolved": False,
+                })
         return super().create(vals_list)
 
     def write(self, vals):
+        vals = dict(vals)
         if not self.env.su and not self.env.user.has_group(ADMIN_GROUP):
-            restricted = {"technician_id", "priority", "device_id", "origin"} & set(vals)
-            if restricted:
+            allowed = {"state", "description", "root_cause"}
+            forbidden = set(vals) - allowed
+            if forbidden:
                 raise AccessError(_(
-                    "Solo un administrador puede modificar: %s") % ", ".join(sorted(restricted)))
+                    "El técnico no puede modificar estos campos: %s") % ", ".join(sorted(forbidden)))
         if "state" in vals:
             labels = dict(self._fields["state"].selection)
+            new = vals["state"]
+            if new not in labels:
+                raise ValidationError(_("El estado indicado no es válido."))
             for rec in self:
-                new = vals["state"]
                 if new != rec.state and new not in self._TRANSITIONS[rec.state]:
                     raise ValidationError(_("Transición no permitida: %s -> %s.") % (
                         labels[rec.state], labels[new]))
-            if vals["state"] == "resolved":
-                vals = dict(vals, date_resolved=fields.Datetime.now())
+            if new == "resolved":
+                vals["date_resolved"] = fields.Datetime.now()
         previous = {rec.id: rec.technician_id for rec in self}
         result = super().write(vals)
         if "technician_id" in vals:
