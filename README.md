@@ -137,6 +137,7 @@ netpulse.example.com {
 ## Estructura
 ```
 addons/netpulse/   módulo Odoo (models, services, controllers, static OWL, views, security, tests)
+addons/netpulse_core/   dominio, casos de uso y servicio JWT puros
 config/odoo.conf   list_db=False, dbfilter, proxy_mode
 docs/openapi.yaml  especificación OpenAPI 3
 postman/           colección y environment (sin llaves)
