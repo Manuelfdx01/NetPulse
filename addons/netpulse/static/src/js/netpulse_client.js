@@ -200,10 +200,9 @@ export class NetpulseIncidentClient extends Component {
         try {
             await api.updateState(this.state.selectedIncident.id, nextState);
             this.state.notice = "El estado de la incidencia se actualizó.";
-            await this.selectIncident({
-                id: this.state.selectedIncident.id,
-            });
+            const incidentId = this.state.selectedIncident.id;
             await this.loadIncidents();
+            await this.selectIncident({ id: incidentId });
         } catch (error) {
             this.state.error = error.message;
             if (error.status === 401) {
