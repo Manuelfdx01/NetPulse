@@ -17,6 +17,7 @@ class OdooIncidentRepository:
         ).browse(incident_id).exists()
         if not incident:
             return None
+        incident.check_access_rights("read")
         incident.check_access_rule("read")
         return incident
 
