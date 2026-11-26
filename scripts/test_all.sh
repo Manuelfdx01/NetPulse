@@ -19,16 +19,16 @@ docker run --rm \
     node:20-alpine \
     npm run test:client
 
-echo "==> Pruebas unitarias del dominio y aplicación"
+echo "==> Pruebas unitarias del dominio y aplicación + cobertura"
 docker compose run --rm \
-    --entrypoint python3 \
-    --workdir /mnt/extra-addons/netpulse \
+    --entrypoint bash \
+    --workdir /mnt/extra-addons \
     odoo \
-    -m unittest discover -s tests/unit -p 'test_*.py'
+    -lc "python3 -m pip install --break-system-packages coverage==7.6.1 && PYTHONPATH=/mnt/extra-addons python3 -m coverage run --source=netpulse.domain,netpulse.application -m unittest discover -s netpulse/tests/unit -p 'test_*.py' && python3 -m coverage report --include='netpulse/domain/*,netpulse/application/*' --fail-under=70 && python3 -m coverage html --include='netpulse/domain/*,netpulse/application/*' -d /mnt/extra-addons/netpulse/coverage_html"
 
 echo "==> Pruebas ORM e integración HTTP de Odoo"
 docker compose run --rm odoo \
-    odoo --database=netpulse_test --init=netpulse \
+    odoo --database=netpulse_test --init=netpulse --update=netpulse \
     --test-enable --stop-after-init --log-level=test
 
 echo "==> Todas las suites terminaron correctamente."
