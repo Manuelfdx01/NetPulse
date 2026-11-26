@@ -36,7 +36,10 @@ class TestNetpulseUserWizard(TransactionCase):
         self.assertTrue(user)
         self.assertTrue(user.has_group("netpulse.group_netpulse_technician"))
         self.assertFalse(user.has_group("netpulse.group_netpulse_admin"))
-        self.assertIsNone(user._check_credentials("ClaveSegura123", {"interactive": True}))
+        self.assertIsNone(user.with_user(user)._check_credentials(
+            "ClaveSegura123",
+            {"interactive": True},
+        ))
 
     def test_admin_can_create_another_admin(self):
         wizard = self._wizard(role="admin", login="new_admin")
