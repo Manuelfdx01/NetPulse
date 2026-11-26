@@ -1,7 +1,5 @@
 import json
 
-import requests
-
 from odoo.tests.common import HttpCase, tagged
 
 
@@ -53,9 +51,10 @@ class TestNetpulseHttpApi(HttpCase):
             headers["Authorization"] = "Bearer %s" % token
 
         if method == "PATCH":
-            return requests.patch(
+            return self.opener.request(
+                "PATCH",
                 self.base_url() + path,
-                json=payload,
+                data=json.dumps(payload),
                 headers=headers,
                 timeout=10,
             )
