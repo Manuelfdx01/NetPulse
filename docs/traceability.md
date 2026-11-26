@@ -11,9 +11,9 @@
 ## Ubicación de las pruebas
 
 - API HTTP: `addons/netpulse/tests/test_api.py`
-- Reglas de dominio: `addons/netpulse/tests/unit/test_incident_rules.py`
-- Casos de uso con dobles: `addons/netpulse/tests/unit/test_incident_service.py`
-- JWT: `addons/netpulse/tests/unit/test_jwt_service.py`
+- Reglas de dominio: `addons/netpulse/tests/unit/test_incident_rules.py` (ejecutan `netpulse_core.domain`)
+- Casos de uso con dobles: `addons/netpulse/tests/unit/test_incident_service.py` (ejecutan `netpulse_core.application`)
+- JWT: `addons/netpulse/tests/unit/test_jwt_service.py` (ejecuta `netpulse_core.jwt_service`)
 - Cliente HTTP: `addons/netpulse/tests/client/api_client.test.js`
 - Estado de presentación: `addons/netpulse/tests/client/presentation_state.test.js`
 
