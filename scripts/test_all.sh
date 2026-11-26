@@ -25,7 +25,7 @@ docker compose run --rm \
     --entrypoint bash \
     --workdir /mnt/extra-addons \
     odoo \
-    -lc "python3 -m pip install coverage==7.6.1 && PYTHONPATH=/mnt/extra-addons python3 -m coverage run --source=netpulse.domain,netpulse.application -m unittest discover -s netpulse/tests/unit -p 'test_*.py' && python3 -m coverage report --include='netpulse/domain/*,netpulse/application/*' --fail-under=70 && python3 -m coverage html --include='netpulse/domain/*,netpulse/application/*' -d /mnt/extra-addons/netpulse/coverage_html"
+    -lc "python3 -m pip install coverage==7.6.1 && PYTHONPATH=/mnt/extra-addons python3 -m coverage run --source=netpulse_core.domain,netpulse_core.application -m unittest discover -s netpulse/tests/unit -p 'test_*.py' && python3 -m coverage report --include='netpulse_core/domain/*,netpulse_core/application/*' --fail-under=70 && python3 -m coverage html --include='netpulse_core/domain/*,netpulse_core/application/*' -d /mnt/extra-addons/netpulse/coverage_html"
 
 echo "==> Pruebas ORM e integración HTTP de Odoo"
 docker compose run --rm odoo \
