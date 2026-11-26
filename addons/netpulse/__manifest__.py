@@ -7,7 +7,13 @@
     "category": "Services",
     "author": "Equipo NetPulse - Ingeniería de Software II, UNAL",
     "license": "LGPL-3",
-    "depends": ["base", "mail"],
+    "depends": ["base", "mail", "web"],
+    "assets": {
+        "web.assets_backend": [
+            "netpulse/static/src/js/netpulse_client.js",
+            "netpulse/static/src/xml/netpulse_client.xml",
+        ],
+    },
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",
