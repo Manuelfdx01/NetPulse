@@ -45,13 +45,13 @@ class TestNetpulseHttpApi(HttpCase):
         self.assertEqual(response.status_code, 200)
         return response.json()["access_token"]
 
-    def _request(self, path, method="GET", token=None, payload=None):
+    def _request(self, path, token=None, payload=None):
         headers = {"Content-Type": "application/json"}
         if token:
             headers["Authorization"] = "Bearer %s" % token
 
         data = json.dumps(payload) if payload is not None else None
-        return self.url_open(path, data=data, headers=headers, method=method)
+        return self.url_open(path, data=data, headers=headers)
 
     def test_login_returns_signed_bearer_token(self):
         response = self._login()
@@ -80,7 +80,6 @@ class TestNetpulseHttpApi(HttpCase):
     def test_create_incident_returns_201(self):
         response = self._request(
             "/api/v1/incidents",
-            method="POST",
             token=self._token(),
             payload={
                 "device_id": self.device.id,
