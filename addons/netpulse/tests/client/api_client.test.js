@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 import { createServer } from "node:http";
 
-import { NetpulseApiClient } from "../static/src/js/api_client.js";
+import { NetpulseApiClient } from "../../static/src/js/api_client.js";
 
 let server;
 let baseUrl;
