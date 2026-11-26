@@ -49,8 +49,8 @@ jobs:
       - name: Run domain and application tests with coverage
         run: |
           PYTHONPATH=addons python -m coverage run --source=netpulse_core.domain,netpulse_core.application -m unittest discover -s addons/netpulse/tests/unit -p 'test_*.py'
-          python -m coverage report --include='netpulse_core/domain/*,netpulse_core/application/*' --fail-under=70
-          python -m coverage html --include='netpulse_core/domain/*,netpulse_core/application/*' -d addons/netpulse/coverage_html
+          python -m coverage report --fail-under=70
+          python -m coverage html -d addons/netpulse/coverage_html
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
