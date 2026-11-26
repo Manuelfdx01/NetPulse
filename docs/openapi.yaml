@@ -1,9 +1,11 @@
 openapi: 3.0.3
 info:
-  title: NetPulse API (Odoo 17 - API externa JSON-RPC)
+  title: NetPulse API actual (Odoo 17 - JSON-RPC)
   version: 1.0.0
   description: |
     API del MVP de NetPulse, expuesta por la API externa de Odoo 17 Community.
+
+    **Estado de autenticación:** esta API actual usa sesión/API key de Odoo mediante JSON-RPC. No emite JWT y no implementa el requisito JWT + Authorization: Bearer del Prototipo 2. La API key se pasa como argumento JSON-RPC; no debe confundirse con un token Bearer ni con un JWT.
 
     **Particularidades de Odoo (documentadas honestamente):**
     - Todas las operaciones usan un único endpoint `POST /jsonrpc` (JSON-RPC 2.0). Lo que cambia es `params.service`, `params.method` y `params.args`.
@@ -52,8 +54,7 @@ paths:
         | Crear/leer/actualizar/eliminar dispositivos | object | execute_kw (`create`, `search_read`, `write`, `unlink` sobre `netpulse.device`) | leer: técnico y admin; escribir: admin |
         | Crear/leer/actualizar incidencias | object | execute_kw (sobre `netpulse.incident`) | técnico: solo las suyas, sin cambiar técnico/prioridad; admin: todo; eliminar: admin |
       operationId: jsonrpc
-      security:
-        - bearerAuth: []
+      security: []
       requestBody:
         required: true
         content:
@@ -247,14 +248,6 @@ paths:
         '500':
           description: Error interno del servidor (sin trazas en producción).
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: Odoo API key
-      description: |
-        API key de Odoo. Se genera en Preferencias > Seguridad de la cuenta > Nueva clave de API.
-        En JSON-RPC viaja en `params.args` (argumento de contraseña). Nunca se versiona en el repositorio.
   schemas:
     JsonRpcRequest:
       type: object
