@@ -1,6 +1,6 @@
 import unittest
 
-from netpulse.domain.incident_rules import (
+from netpulse_core.domain.incident_rules import (
     InvalidAssignment,
     InvalidTransition,
     is_open,
