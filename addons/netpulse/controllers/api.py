@@ -76,7 +76,7 @@ class NetpulseApiController(http.Controller):
     @http.route(
         "/api/v1/auth/login",
         type="http",
-        auth="none",
+        auth="public",
         methods=["POST"],
         csrf=False,
         save_session=False,
@@ -123,7 +123,7 @@ class NetpulseApiController(http.Controller):
     @http.route(
         "/api/v1/incidents",
         type="http",
-        auth="none",
+        auth="public",
         methods=["GET"],
         csrf=False,
         save_session=False,
@@ -155,7 +155,7 @@ class NetpulseApiController(http.Controller):
     @http.route(
         "/api/v1/incidents/<int:incident_id>",
         type="http",
-        auth="none",
+        auth="public",
         methods=["GET"],
         csrf=False,
         save_session=False,
@@ -193,7 +193,7 @@ class NetpulseApiController(http.Controller):
     @http.route(
         "/api/v1/incidents",
         type="http",
-        auth="none",
+        auth="public",
         methods=["POST"],
         csrf=False,
         save_session=False,
@@ -231,7 +231,7 @@ class NetpulseApiController(http.Controller):
     @http.route(
         "/api/v1/incidents/<int:incident_id>/state",
         type="http",
-        auth="none",
+        auth="public",
         methods=["PATCH"],
         csrf=False,
         save_session=False,
