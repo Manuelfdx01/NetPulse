@@ -9,7 +9,7 @@ import time
 
 import jwt
 
-from odoo.exceptions import AccessDenied, UserError
+from odoo.exceptions import AccessDenied
 
 ISSUER = "netpulse"
 TOKEN_TTL_SECONDS = 30 * 60
@@ -25,7 +25,7 @@ class NetpulseJwtService:
     def _secret():
         secret = os.environ.get("NETPULSE_JWT_SECRET", "")
         if len(secret.encode("utf-8")) < 32:
-            raise UserError(
+            raise RuntimeError(
                 "NETPULSE_JWT_SECRET debe tener al menos 32 bytes."
             )
         return secret
