@@ -10,6 +10,8 @@
     "depends": ["base", "mail", "web"],
     "assets": {
         "web.assets_backend": [
+            "netpulse/static/src/js/api_client.js",
+            "netpulse/static/src/js/presentation_state.js",
             "netpulse/static/src/js/netpulse_client.js",
             "netpulse/static/src/xml/netpulse_client.xml",
         ],
