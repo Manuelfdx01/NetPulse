@@ -62,6 +62,7 @@ jobs:
           docker run --rm --network host \
             -e HOST=127.0.0.1 -e USER=odoo -e PASSWORD=odoo \
             -e NETPULSE_JWT_SECRET=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
+            -e PYTHONPATH=/mnt/extra-addons \
             -v "${GITHUB_WORKSPACE}/addons:/mnt/extra-addons:ro" \
             odoo:17.0 \
             odoo --db_host=127.0.0.1 --db_port=5432 \
