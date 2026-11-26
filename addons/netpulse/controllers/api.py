@@ -102,7 +102,10 @@ class NetpulseApiController(http.Controller):
             if not user:
                 raise AccessDenied(_("Credenciales inválidas."))
 
-            user._check_credentials(password, {"interactive": True})
+            user.with_user(user)._check_credentials(
+                password,
+                {"interactive": True},
+            )
             if not (
                 user.has_group(ADMIN_GROUP)
                 or user.has_group(TECHNICIAN_GROUP)
