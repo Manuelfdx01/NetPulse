@@ -19,6 +19,8 @@ ALGORITHM = "HS256"
 class NetpulseJwtService:
     """Emite y valida tokens de acceso firmados con HS256."""
 
+    TOKEN_TTL_SECONDS = TOKEN_TTL_SECONDS
+
     @staticmethod
     def _secret():
         secret = os.environ.get("NETPULSE_JWT_SECRET", "")
