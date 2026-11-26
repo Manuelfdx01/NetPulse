@@ -3,8 +3,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from odoo.exceptions import AccessDenied
-from netpulse_core.jwt_service import NetpulseJwtService
+from netpulse_core.jwt_service import InvalidToken, NetpulseJwtService
 
 
 class FakeUsers:
@@ -59,14 +58,14 @@ class TestJwtService(unittest.TestCase):
             (header, payload, replacement + signature[1:])
         )
 
-        with self.assertRaises(AccessDenied):
+        with self.assertRaises(InvalidToken):
             NetpulseJwtService.authenticate_token(
                 tampered_token,
                 FakeUsers(self.user),
             )
 
     def test_malformed_token_is_rejected(self):
-        with self.assertRaises(AccessDenied):
+        with self.assertRaises(InvalidToken):
             NetpulseJwtService.authenticate_token(
                 "not.a.jwt",
                 FakeUsers(self.user),
