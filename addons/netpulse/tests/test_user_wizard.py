@@ -36,7 +36,7 @@ class TestNetpulseUserWizard(TransactionCase):
         self.assertTrue(user)
         self.assertTrue(user.has_group("netpulse.group_netpulse_technician"))
         self.assertFalse(user.has_group("netpulse.group_netpulse_admin"))
-        self.assertTrue(user._check_credentials("ClaveSegura123", {"interactive": True}) is None)
+        self.assertIsNone(user._check_credentials("ClaveSegura123", {"interactive": True}))
 
     def test_admin_can_create_another_admin(self):
         wizard = self._wizard(role="admin", login="new_admin")
@@ -56,12 +56,11 @@ class TestNetpulseUserWizard(TransactionCase):
         with self.assertRaises(UserError):
             wizard.action_create_user()
 
-    def test_technician_cannot_create_users(self):
-        wizard = self.env["netpulse.user.wizard"].with_user(self.tech).create({
-            "name": "Intento",
-            "login": "forbidden_user",
-            "password": "ClaveSegura123",
-            "role": "admin",
-        })
+    def test_technician_cannot_open_user_wizard(self):
         with self.assertRaises(AccessError):
-            wizard.action_create_user()
+            self.env["netpulse.user.wizard"].with_user(self.tech).create({
+                "name": "Intento",
+                "login": "forbidden_user",
+                "password": "ClaveSegura123",
+                "role": "admin",
+            })
