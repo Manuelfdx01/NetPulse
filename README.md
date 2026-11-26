@@ -35,8 +35,14 @@ Abra http://localhost:8069 e ingrese con `admin` (la base creada por línea de c
 Para actualizar el módulo tras cambios de código:
 `docker compose run --rm odoo odoo -d netpulse -u netpulse --stop-after-init`
 
-Pruebas automáticas del módulo (en una base aparte):
-`docker compose run --rm odoo odoo -d netpulse_test -i netpulse --test-enable --stop-after-init`
+Ejecutar todas las pruebas (cliente, dominio, aplicación, ORM e integración HTTP) desde un clon limpio:
+
+```bash
+bash scripts/test_all.sh
+```
+
+El script usa Node 20 y la imagen Odoo 17, inicia PostgreSQL y crea/actualiza la base
+`netpulse_test`. Para ejecutar solo las pruebas del cliente: `npm run test:client`.
 
 ## Variables de entorno (valores de ejemplo en `.env.example`)
 | Variable | Uso |
