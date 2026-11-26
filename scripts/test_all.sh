@@ -21,6 +21,7 @@ docker run --rm \
 
 echo "==> Pruebas unitarias del dominio y aplicación + cobertura"
 docker compose run --rm \
+    --user root \
     --entrypoint bash \
     --workdir /mnt/extra-addons \
     odoo \
