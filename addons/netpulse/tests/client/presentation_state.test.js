@@ -4,7 +4,7 @@ import { test } from "node:test";
 import {
     createInitialIncidentState,
     resolveIncidentListState,
-} from "../static/src/js/presentation_state.js";
+} from "../../static/src/js/presentation_state.js";
 
 test("la lista vacía produce el estado vacío", () => {
     const state = createInitialIncidentState();
