@@ -1,7 +1,7 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
-from ..domain.incident_rules import (
+from netpulse_core.domain.incident_rules import (
     IncidentRuleError,
     InvalidAssignment,
     InvalidTransition,
