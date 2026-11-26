@@ -20,7 +20,7 @@ export class NetpulseIncidentClient extends Component {
     }
 
     async loadIncidentsIfAuthenticated() {
-        if (!accessToken) {
+        if (!api.accessToken) {
             return;
         }
         await this.loadIncidents();
