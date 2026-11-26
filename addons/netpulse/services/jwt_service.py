@@ -80,9 +80,15 @@ class NetpulseJwtService:
         if len(parts) != 3 or not all(parts):
             raise InvalidToken("Estructura JWT inválida.")
 
-        header = json.loads(cls._decode_segment(parts[0]))
-        payload = json.loads(cls._decode_segment(parts[1]))
-        signature = cls._decode_segment(parts[2])
+        try:
+            header = json.loads(cls._decode_segment(parts[0]))
+            payload = json.loads(cls._decode_segment(parts[1]))
+            signature = cls._decode_segment(parts[2])
+        except (UnicodeDecodeError, json.JSONDecodeError, TypeError) as exc:
+            raise InvalidToken("Contenido JWT inválido.") from exc
+
+        if not isinstance(header, dict) or not isinstance(payload, dict):
+            raise InvalidToken("Header y payload deben ser objetos JSON.")
 
         if header.get("typ") != "JWT" or header.get("alg") != ALGORITHM:
             raise InvalidToken("Algoritmo JWT no permitido.")
