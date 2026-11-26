@@ -1,4 +1,4 @@
-# NetPulse — Prototipo 1 
+# NetPulse — Prototipo 2 (en desarrollo)
 
 Ingeniería de Software II (2016702) · Universidad Nacional de Colombia · Sede Bogotá · 2026-II
 
