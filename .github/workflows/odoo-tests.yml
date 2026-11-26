@@ -1,13 +1,13 @@
 name: NetPulse Odoo tests
 
 on:
-  push:
-    branches:
-      - main
-      - fix/prototipo-2-audit
   pull_request:
     branches:
       - main
+
+concurrency:
+  group: netpulse-prototipo-2-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   odoo-tests:
@@ -29,6 +29,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Run client unit and HTTP integration tests
         run: npm run test:client
