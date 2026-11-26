@@ -7,6 +7,7 @@ from odoo.exceptions import AccessDenied, AccessError, MissingError, UserError, 
 from odoo.http import request
 from werkzeug.wrappers import Response
 
+from ..domain.incident_rules import validate_device_identifier
 from ..services.jwt_service import NetpulseJwtService
 
 _logger = logging.getLogger(__name__)
@@ -210,8 +211,10 @@ class NetpulseApiController(http.Controller):
                 raise ValidationError(
                     _("Campos no permitidos: %s") % ", ".join(sorted(unexpected))
                 )
-            if not isinstance(payload.get("device_id"), int):
-                raise ValidationError(_("device_id debe ser un entero."))
+            try:
+                validate_device_identifier(payload.get("device_id"))
+            except ValueError as exc:
+                raise ValidationError(_(str(exc))) from exc
 
             values = {
                 key: value
