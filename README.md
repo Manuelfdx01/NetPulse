@@ -13,6 +13,8 @@ asigna a un técnico y el técnico la lleva de *Pendiente → En proceso → Res
 - Documentación de la API: [`docs/openapi.yaml`](docs/openapi.yaml) (pegar en https://editor.swagger.io)
 - Tablero (GitHub Projects): [`Git-project`](https://github.com/users/Fmoram/projects/2)
 - Documento PDF del Prototipo 1: Raíz del repositorio
+- [Trazabilidad de historias y pruebas](docs/traceability.md)
+- [Plantilla de evidencia de depuración](docs/debugging-evidence.md)
 
 ## Tecnologías
 Odoo 17 Community (Python, ORM, OWL/XML) · API HTTP con JWT · PostgreSQL 15 · Docker Compose · GNS3 (API REST).
@@ -42,7 +44,13 @@ bash scripts/test_all.sh
 ```
 
 El script usa Node 20 y la imagen Odoo 17, inicia PostgreSQL y crea/actualiza la base
-`netpulse_test`. Para ejecutar solo las pruebas del cliente: `npm run test:client`.
+`netpulse_test`. Genera el reporte HTML de cobertura en `addons/netpulse/coverage_html/`.
+
+Inventario implementado: 21 pruebas unitarias puras de backend (incluye 5 casos de uso
+con dobles), 8 pruebas HTTP de integración de backend, 2 pruebas unitarias de presentación
+y 2 pruebas de integración del cliente HTTP. Además, hay 11 pruebas ORM de Odoo para
+permisos, incidencias y creación de usuarios. Los resultados definitivos se consultan en CI.
+Para ejecutar solo las pruebas del cliente: `npm run test:client`.
 
 ## Variables de entorno (valores de ejemplo en `.env.example`)
 | Variable | Uso |
