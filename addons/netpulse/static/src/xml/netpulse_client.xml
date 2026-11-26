@@ -97,17 +97,17 @@
                     </div>
                 </div>
 
-                <div t-if="state.loading" class="text-center py-4" role="status">
+                <div t-if="incidentListState === 'loading'" class="text-center py-4" role="status">
                     <span class="spinner-border spinner-border-sm" aria-hidden="true"/>
                     <span class="ms-2">Cargando incidencias...</span>
                 </div>
 
-                <div t-if="!state.loading and !state.error and state.incidents.length === 0"
+                <div t-if="incidentListState === 'empty'"
                      class="alert alert-info">
                     No hay incidencias para mostrar.
                 </div>
 
-                <div t-if="!state.loading and state.incidents.length"
+                <div t-if="incidentListState === 'success'"
                      class="row g-3">
                     <div class="col-lg-7">
                         <div class="list-group">
