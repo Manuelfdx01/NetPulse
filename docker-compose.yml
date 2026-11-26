@@ -25,6 +25,7 @@ services:
       GNS3_USER: ${GNS3_USER:-}
       GNS3_PASSWORD: ${GNS3_PASSWORD:-}
       NETPULSE_JWT_SECRET: ${NETPULSE_JWT_SECRET}
+      PYTHONPATH: /mnt/extra-addons
     command: ["odoo", "--admin-passwd=${ODOO_MASTER_PASSWORD}"]
     extra_hosts:
       - "host.docker.internal:host-gateway"
