@@ -54,7 +54,8 @@
                         </group>
                         <group string="Gestión">
                             <field name="priority" readonly="not is_admin"/>
-                            <field name="technician_id" readonly="not is_admin"/>
+                            <field name="technician_id" readonly="not is_admin"
+                                   domain="[('groups_id', 'in', [ref('netpulse.group_netpulse_technician')]), ('groups_id', 'not in', [ref('netpulse.group_netpulse_admin')])]"/>
                             <field name="date_resolved"/>
                         </group>
                     </group>
