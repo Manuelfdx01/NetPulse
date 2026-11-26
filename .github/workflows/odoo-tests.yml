@@ -1,0 +1,42 @@
+name: NetPulse Odoo tests
+
+on:
+  push:
+    branches:
+      - main
+      - fix/prototipo-2-audit
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  odoo-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U odoo -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Odoo 17 module tests
+        run: |
+          docker run --rm --network host \
+            -v "${GITHUB_WORKSPACE}/addons:/mnt/extra-addons:ro" \
+            odoo:17.0 \
+            odoo --db_host=127.0.0.1 --db_port=5432 \
+              --db_user=odoo --db_password=odoo \
+              --addons-path=/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons \
+              --database=netpulse_test --init=netpulse \
+              --test-enable --stop-after-init --log-level=test
