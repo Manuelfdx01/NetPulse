@@ -1,6 +1,17 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
+from ..domain.incident_rules import (
+    IncidentRuleError,
+    InvalidAssignment,
+    InvalidTransition,
+    is_open,
+    normalize_technician_payload,
+    validate_assignment,
+    validate_priority,
+    validate_transition,
+)
+
 ADMIN_GROUP = "netpulse.group_netpulse_admin"
 TECHNICIAN_GROUP = "netpulse.group_netpulse_technician"
 
@@ -17,13 +28,6 @@ class NetpulseIncident(models.Model):
     _description = "Incidencia de red"
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "priority desc, date_detected desc, id desc"
-
-    # Patrón State: tabla de transiciones permitidas
-    _TRANSITIONS = {
-        "pending": {"in_progress"},
-        "in_progress": {"resolved"},
-        "resolved": set(),
-    }
 
     name = fields.Char("Referencia", readonly=True, copy=False, default=lambda self: _("Nuevo"))
     device_id = fields.Many2one("netpulse.device", string="Dispositivo", required=True,
@@ -53,7 +57,7 @@ class NetpulseIncident(models.Model):
     @api.depends("state")
     def _compute_is_open(self):
         for rec in self:
-            rec.is_open = rec.state != "resolved"
+            rec.is_open = is_open(rec.state)
 
     @api.depends_context("uid")
     def _compute_is_admin(self):
@@ -87,11 +91,22 @@ class NetpulseIncident(models.Model):
     def _check_assigned_user_is_technician(self):
         for rec in self:
             user = rec.technician_id
-            if user and (
-                not user.has_group(TECHNICIAN_GROUP)
-                or user.has_group(ADMIN_GROUP)
-            ):
-                raise ValidationError(_("La incidencia solo puede asignarse a un usuario con rol Técnico."))
+            if user:
+                try:
+                    validate_assignment(
+                        is_technician=user.has_group(TECHNICIAN_GROUP),
+                        is_admin=user.has_group(ADMIN_GROUP),
+                    )
+                except InvalidAssignment as exc:
+                    raise ValidationError(_(str(exc))) from exc
+
+    @api.constrains("priority")
+    def _check_priority(self):
+        for rec in self:
+            try:
+                validate_priority(rec.priority)
+            except IncidentRuleError as exc:
+                raise ValidationError(_(str(exc))) from exc
 
 
     # ------------------------------------------------------------------
@@ -100,20 +115,17 @@ class NetpulseIncident(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         is_admin = self.env.su or self.env.user.has_group(ADMIN_GROUP)
-        for vals in vals_list:
+        for index, vals in enumerate(vals_list):
             if not vals.get("name") or vals["name"] == _("Nuevo"):
                 vals["name"] = self.env["ir.sequence"].sudo().next_by_code("netpulse.incident") or _("Nuevo")
             # El técnico solo puede registrar incidencias manuales propias y pendientes.
             # Se fuerzan estos valores para impedir elevar prioridad, falsificar el origen,
             # asignar a terceros o crear incidencias directamente resueltas.
             if not is_admin:
-                vals.update({
-                    "technician_id": self.env.uid,
-                    "priority": "1",
-                    "state": "pending",
-                    "origin": "manual",
-                    "date_resolved": False,
-                })
+                vals_list[index] = normalize_technician_payload(
+                    vals,
+                    technician_id=self.env.uid,
+                )
         return super().create(vals_list)
 
     def write(self, vals):
@@ -125,14 +137,12 @@ class NetpulseIncident(models.Model):
                 raise AccessError(_(
                     "El técnico no puede modificar estos campos: %s") % ", ".join(sorted(forbidden)))
         if "state" in vals:
-            labels = dict(self._fields["state"].selection)
             new = vals["state"]
-            if new not in labels:
-                raise ValidationError(_("El estado indicado no es válido."))
             for rec in self:
-                if new != rec.state and new not in self._TRANSITIONS[rec.state]:
-                    raise ValidationError(_("Transición no permitida: %s -> %s.") % (
-                        labels[rec.state], labels[new]))
+                try:
+                    validate_transition(rec.state, new)
+                except (InvalidTransition, IncidentRuleError) as exc:
+                    raise ValidationError(_(str(exc))) from exc
             if new == "resolved":
                 vals["date_resolved"] = fields.Datetime.now()
         previous = {rec.id: rec.technician_id for rec in self}
