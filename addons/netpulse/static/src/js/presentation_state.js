@@ -10,6 +10,7 @@ export function createInitialIncidentState() {
         incidents: [],
         selectedIncident: null,
         deviceId: "",
+        devices: [],
         description: "",
         rootCause: "",
         priority: "1",
