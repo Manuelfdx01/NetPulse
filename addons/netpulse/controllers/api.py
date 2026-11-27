@@ -237,6 +237,63 @@ class NetpulseApiController(http.Controller):
         except Exception as error:
             return self._handle_error(error)
 
+
+    @http.route(
+        "/api/v1/technicians",
+        type="http",
+        auth="public",
+        methods=["GET"],
+        csrf=False,
+        save_session=False,
+    )
+    def list_technicians(self, **kwargs):
+        try:
+            user = self._authenticated_user()
+            if not user.has_group(ADMIN_GROUP):
+                raise AccessError(_("Solo un administrador puede consultar los técnicos."))
+            technicians = request.env["res.users"].sudo().search(
+                [("groups_id", "in", [request.env.ref(TECHNICIAN_GROUP).id]),
+                 ("active", "=", True)],
+                order="name",
+            )
+            return self._response({
+                "items": [{"id": technician.id, "name": technician.name}
+                          for technician in technicians]
+            })
+        except Exception as error:
+            return self._handle_error(error)
+
+    @http.route(
+        "/api/v1/incidents/<int:incident_id>/assignment",
+        type="http",
+        auth="public",
+        methods=["PATCH"],
+        csrf=False,
+        save_session=False,
+    )
+    def assign_incident(self, incident_id, **kwargs):
+        try:
+            user = self._authenticated_user()
+            if not user.has_group(ADMIN_GROUP):
+                raise AccessError(_("Solo un administrador puede asignar técnicos."))
+            payload = self._json_body()
+            if set(payload) != {"technician_id"}:
+                raise ValidationError(_("Debe indicar únicamente el técnico."))
+            technician_id = payload["technician_id"]
+            technician = request.env["res.users"].sudo().browse(technician_id).exists()
+            if not technician or not technician.has_group(TECHNICIAN_GROUP):
+                raise ValidationError(_("Seleccione un usuario con rol de técnico."))
+            incident = request.env["netpulse.incident"].sudo().browse(incident_id).exists()
+            if not incident:
+                raise IncidentNotFound(_("La incidencia solicitada no existe."))
+            incident.write({"technician_id": technician.id})
+            return self._response({
+                "id": incident.id,
+                "technician_id": [technician.id, technician.name],
+            })
+        except Exception as error:
+            return self._handle_error(error)
+
     @http.route(
         "/api/v1/incidents/<int:incident_id>/state",
         type="http",
