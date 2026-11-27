@@ -125,6 +125,8 @@ class TestNetpulseHttpApi(HttpCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertTrue(response.json()["id"])
+        incident = self.env["netpulse.incident"].browse(response.json()["id"])
+        self.assertEqual(incident.device_id, self.device)
 
     def test_invalid_incident_payload_returns_400(self):
         response = self._request(
