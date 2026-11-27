@@ -93,6 +93,25 @@ class TestNetpulseHttpApi(HttpCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("items", response.json())
 
+    def test_list_devices_without_token_returns_401(self):
+        response = self._request("/api/v1/devices")
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["error"], "unauthorized")
+
+    def test_list_devices_with_token_returns_available_devices(self):
+        response = self._request(
+            "/api/v1/devices",
+            token=self._token(),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        devices = response.json()["items"]
+        self.assertTrue(any(
+            device["id"] == self.device.id and device["name"] == self.device.name
+            for device in devices
+        ))
+
     def test_create_incident_returns_201(self):
         response = self._request(
             "/api/v1/incidents",
