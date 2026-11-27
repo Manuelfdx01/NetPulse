@@ -16,6 +16,7 @@ export class NetpulseIncidentClient extends Component {
         this.changeState = this.changeState.bind(this);
         this.openCreateForm = this.openCreateForm.bind(this);
         this.assignTechnician = this.assignTechnician.bind(this);
+        this.updatePriority = this.updatePriority.bind(this);
 
         onWillStart(() => this.loadIncidentsIfAuthenticated());
     }
@@ -109,6 +110,7 @@ export class NetpulseIncidentClient extends Component {
             this.state.selectedTechnicianId = this.state.selectedIncident.technician_id
                 ? String(this.state.selectedIncident.technician_id[0])
                 : "";
+            this.state.selectedPriority = String(this.state.selectedIncident.priority);
             if (this.state.user.role === "admin" && !this.state.technicians.length) {
                 const result = await api.listTechnicians();
                 this.state.technicians = result.items || [];
@@ -120,6 +122,29 @@ export class NetpulseIncidentClient extends Component {
             }
         } finally {
             this.state.loading = false;
+        }
+    }
+
+    async updatePriority() {
+        if (
+            !this.state.selectedIncident ||
+            this.state.user.role !== "admin" ||
+            !["0", "1", "2"].includes(this.state.selectedPriority)
+        ) {
+            return;
+        }
+        this.state.submitting = true;
+        this.state.error = "";
+        this.state.notice = "";
+        try {
+            const incidentId = this.state.selectedIncident.id;
+            await api.updatePriority(incidentId, this.state.selectedPriority);
+            await this.selectIncident({ id: incidentId });
+            this.state.notice = "La prioridad se actualizó correctamente.";
+        } catch (error) {
+            this.state.error = error.message;
+        } finally {
+            this.state.submitting = false;
         }
     }
 
