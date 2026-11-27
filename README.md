@@ -100,6 +100,7 @@ consume los endpoints versionados de la API.
 
 - `POST /api/v1/auth/login`: valida usuario y contraseña de Odoo y devuelve un JWT HS256.
 - `GET /api/v1/incidents`: lista las incidencias visibles para el usuario.
+- `GET /api/v1/devices`: lista los dispositivos activos que pueden vincularse al crear una incidencia.
 - `GET /api/v1/incidents/{id}`: consulta el detalle de una incidencia.
 - `POST /api/v1/incidents`: crea una incidencia y devuelve HTTP 201.
 - `PATCH /api/v1/incidents/{id}/state`: avanza el estado según las reglas del dominio.
