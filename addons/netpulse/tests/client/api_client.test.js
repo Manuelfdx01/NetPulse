@@ -18,6 +18,19 @@ before(async () => {
             return;
         }
 
+        if (request.url === "/api/v1/devices") {
+            if (request.headers.authorization !== "Bearer test.jwt.token") {
+                response.writeHead(401, { "Content-Type": "application/json" });
+                response.end(JSON.stringify({ error: "unauthorized" }));
+                return;
+            }
+            response.writeHead(200, { "Content-Type": "application/json" });
+            response.end(JSON.stringify({
+                items: [{ id: 3, name: "SW2", status: "up" }],
+            }));
+            return;
+        }
+
         if (request.url === "/api/v1/incidents") {
             if (request.headers.authorization !== "Bearer test.jwt.token") {
                 response.writeHead(401, { "Content-Type": "application/json" });
@@ -49,6 +62,17 @@ test("el cliente mapea correctamente una respuesta HTTP exitosa", async () => {
 
     assert.equal(result.items.length, 1);
     assert.equal(result.items[0].name, "INC-0001");
+});
+
+test("el cliente consulta dispositivos para vincularlos a una incidencia", async () => {
+    const client = new NetpulseApiClient(baseUrl);
+
+    await client.login("tecnico", "password");
+    const result = await client.listDevices();
+
+    assert.equal(result.items.length, 1);
+    assert.equal(result.items[0].id, 3);
+    assert.equal(result.items[0].name, "SW2");
 });
 
 test("el cliente rechaza 401 y elimina el token almacenado en memoria", async () => {
