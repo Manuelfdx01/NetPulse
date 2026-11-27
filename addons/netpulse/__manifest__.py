@@ -14,6 +14,7 @@
             "netpulse/static/src/js/presentation_state.js",
             "netpulse/static/src/js/netpulse_client.js",
             "netpulse/static/src/xml/netpulse_client.xml",
+            "netpulse/static/src/scss/netpulse_client.scss",
         ],
     },
     "data": [
