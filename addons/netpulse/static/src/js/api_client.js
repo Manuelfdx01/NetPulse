@@ -84,6 +84,17 @@ export class NetpulseApiClient {
         });
     }
 
+    listTechnicians() {
+        return this.request("/technicians");
+    }
+
+    assignTechnician(id, technicianId) {
+        return this.request(`/incidents/${id}/assignment`, {
+            method: "PATCH",
+            body: JSON.stringify({ technician_id: Number(technicianId) }),
+        });
+    }
+
     updateState(id, state) {
         return this.request(`/incidents/${id}/state`, {
             method: "PATCH",
