@@ -40,12 +40,12 @@ class TestNetpulseHttpApi(HttpCase):
         separator = "&" if "?" in path else "?"
         return "%s%sdb=%s" % (path, separator, self.env.cr.dbname)
 
-    def _login(self, login="api_technician"):
+    def _login(self, login="api_technician", password="ApiPassword123!"):
         response = self.url_open(
             self._database_path("/api/v1/auth/login"),
             data=json.dumps({
                 "login": login,
-                "password": "ApiPassword123!",
+                "password": password,
             }),
             headers={"Content-Type": "application/json"},
         )
@@ -226,3 +226,71 @@ class TestNetpulseHttpApi(HttpCase):
         )
         self.assertEqual(resolved.status_code, 200)
         self.assertEqual(resolved.json()["state"], "resolved")
+
+    def test_login_with_invalid_password_returns_401(self):
+        response = self._login(password="WrongPassword123!")
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["error"], "unauthorized")
+
+    def test_technician_creation_assigns_incident_to_creator(self):
+        response = self._request(
+            "/api/v1/incidents",
+            token=self._token(),
+            payload={
+                "device_id": self.device.id,
+                "description": "Incidencia de prueba",
+                "root_cause": "Fallo de conexión",
+            },
+            method="POST",
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        incident = self.env["netpulse.incident"].browse(
+            response.json()["id"]
+        )
+        self.assertEqual(incident.technician_id, self.technician)
+        self.assertEqual(incident.priority, "1")
+        self.assertEqual(incident.state, "pending")
+        self.assertEqual(incident.origin, "manual")
+        self.assertFalse(incident.date_resolved)
+
+    def test_technician_cannot_override_incident_priority(self):
+        response = self._request(
+            "/api/v1/incidents",
+            token=self._token(),
+            payload={
+                "device_id": self.device.id,
+                "description": "Prueba de seguridad",
+                "priority": "2",
+            },
+            method="POST",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "bad_request")
+
+    def test_technician_cannot_list_technicians(self):
+        response = self._request(
+            "/api/v1/technicians",
+            token=self._token(),
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "forbidden")
+
+    def test_technician_cannot_assign_incident(self):
+        incident = self.env["netpulse.incident"].create({
+            "device_id": self.device.id,
+            "technician_id": self.technician.id,
+        })
+
+        response = self._request(
+            "/api/v1/incidents/%s/assignment" % incident.id,
+            token=self._token(),
+            payload={"technician_id": self.other_technician.id},
+            method="PATCH",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(incident.technician_id, self.technician)
