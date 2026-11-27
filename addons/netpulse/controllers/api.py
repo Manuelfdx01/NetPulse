@@ -267,6 +267,38 @@ class NetpulseApiController(http.Controller):
             return self._handle_error(error)
 
     @http.route(
+        "/api/v1/incidents/<int:incident_id>/priority",
+        type="http",
+        auth="public",
+        methods=["PATCH"],
+        csrf=False,
+        save_session=False,
+    )
+    def update_incident_priority(self, incident_id, **kwargs):
+        try:
+            user = self._authenticated_user()
+            if not user.has_group(ADMIN_GROUP):
+                raise AccessError(_("Solo un administrador puede cambiar la prioridad."))
+            payload = self._json_body()
+            if set(payload) != {"priority"}:
+                raise ValidationError(_("Debe indicar únicamente la prioridad."))
+            priority = str(payload["priority"])
+            if priority not in {"0", "1", "2"}:
+                raise ValidationError(_("La prioridad debe ser Baja, Media o Alta."))
+            incident = request.env["netpulse.incident"].with_user(user).browse(
+                incident_id
+            ).exists()
+            if not incident:
+                raise IncidentNotFound(_("La incidencia solicitada no existe."))
+            incident.write({"priority": priority})
+            return self._response({
+                "id": incident.id,
+                "priority": incident.priority,
+            })
+        except Exception as error:
+            return self._handle_error(error)
+
+    @http.route(
         "/api/v1/incidents/<int:incident_id>/assignment",
         type="http",
         auth="public",
