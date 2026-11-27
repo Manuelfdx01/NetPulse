@@ -69,7 +69,7 @@ export class NetpulseIncidentClient extends Component {
 
     async openCreateForm() {
         this.state.showCreateForm = !this.state.showCreateForm;
-        if (!this.state.showCreateForm || this.state.user.role !== "admin") {
+        if (!this.state.showCreateForm) {
             return;
         }
         this.state.error = "";
