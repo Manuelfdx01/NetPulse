@@ -95,6 +95,13 @@ export class NetpulseApiClient {
         });
     }
 
+    updatePriority(id, priority) {
+        return this.request(`/incidents/${id}/priority`, {
+            method: "PATCH",
+            body: JSON.stringify({ priority: String(priority) }),
+        });
+    }
+
     updateState(id, state) {
         return this.request(`/incidents/${id}/state`, {
             method: "PATCH",
