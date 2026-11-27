@@ -1,4 +1,4 @@
-# NetPulse — Prototipo 1 (Odoo 17 Community)
+# NetPulse — Prototipo 1 
 
 Ingeniería de Software II (2016702) · Universidad Nacional de Colombia · Sede Bogotá · 2026-II
 
@@ -15,7 +15,6 @@ asigna a un técnico y el técnico la lleva de *Pendiente → En proceso → Res
 - Documentación de la API: [`docs/openapi.yaml`](docs/openapi.yaml) (pegar en https://editor.swagger.io)
 - Tablero (GitHub Projects): [`Git-project`](https://github.com/users/Fmoram/projects/2)
 - Documento PDF del Prototipo 1: Raíz del repositorio
-
 
 ## Tecnologías
 Odoo 17 Community (Python, ORM, vistas XML) · PostgreSQL 15 · Docker Compose · GNS3 (API REST) · Postman.
