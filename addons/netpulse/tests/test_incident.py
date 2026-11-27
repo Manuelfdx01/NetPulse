@@ -43,3 +43,32 @@ class TestNetpulse(TransactionCase):
             self.sw2.with_user(self.tech).unlink()
         with self.assertRaises(AccessError):
             inc.with_user(self.tech).write({"priority": "0"})
+
+    def test_assignment_requires_a_netpulse_technician(self):
+        ordinary_user = self.env["res.users"].create({
+            "name": "Usuario sin rol técnico",
+            "login": "ordinary_netpulse_test",
+            "groups_id": [(6, 0, [self.env.ref("base.group_user").id])],
+        })
+        incident = self.env["netpulse.incident"].create({"device_id": self.sw2.id})
+        with self.assertRaises(ValidationError):
+            incident.write({"technician_id": ordinary_user.id})
+
+    def test_technician_creation_forces_safe_defaults_and_self_assignment(self):
+        other_tech = self.env["res.users"].create({
+            "name": "Otro técnico",
+            "login": "other_tech_test",
+            "groups_id": [(6, 0, [self.env.ref("netpulse.group_netpulse_technician").id])],
+        })
+        incident = self.env["netpulse.incident"].with_user(self.tech).create({
+            "device_id": self.sw2.id,
+            "technician_id": other_tech.id,
+            "priority": "2",
+            "state": "resolved",
+            "origin": "auto",
+        })
+        self.assertEqual(incident.technician_id, self.tech)
+        self.assertEqual(incident.priority, "1")
+        self.assertEqual(incident.state, "pending")
+        self.assertEqual(incident.origin, "manual")
+        self.assertFalse(incident.date_resolved)
