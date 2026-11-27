@@ -36,9 +36,13 @@ class TestNetpulseHttpApi(HttpCase):
             "criticality": "normal",
         })
 
+    def _database_path(self, path):
+        separator = "&" if "?" in path else "?"
+        return "%s%sdb=%s" % (path, separator, self.env.cr.dbname)
+
     def _login(self, login="api_technician"):
         response = self.url_open(
-            "/api/v1/auth/login",
+            self._database_path("/api/v1/auth/login"),
             data=json.dumps({
                 "login": login,
                 "password": "ApiPassword123!",
@@ -57,17 +61,18 @@ class TestNetpulseHttpApi(HttpCase):
         if token:
             headers["Authorization"] = "Bearer %s" % token
 
+        database_path = self._database_path(path)
         if method == "PATCH":
             return self.opener.request(
                 "PATCH",
-                self.base_url() + path,
+                self.base_url() + database_path,
                 data=json.dumps(payload),
                 headers=headers,
                 timeout=10,
             )
 
         data = json.dumps(payload) if payload is not None else None
-        return self.url_open(path, data=data, headers=headers)
+        return self.url_open(database_path, data=data, headers=headers)
 
     def test_login_returns_signed_bearer_token(self):
         response = self._login()
