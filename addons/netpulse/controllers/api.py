@@ -129,6 +129,28 @@ class NetpulseApiController(http.Controller):
             return self._handle_error(error)
 
     @http.route(
+        "/api/v1/devices",
+        type="http",
+        auth="public",
+        methods=["GET"],
+        csrf=False,
+        save_session=False,
+    )
+    def list_devices(self, **kwargs):
+        try:
+            user = self._authenticated_user()
+            devices = request.env["netpulse.device"].with_user(user)
+            records = devices.search_read(
+                [("active", "=", True)],
+                ["name", "device_type", "criticality", "status"],
+                order="name",
+                limit=500,
+            )
+            return self._response({"items": records})
+        except Exception as error:
+            return self._handle_error(error)
+
+    @http.route(
         "/api/v1/incidents",
         type="http",
         auth="public",
