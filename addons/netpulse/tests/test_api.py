@@ -12,6 +12,13 @@ class TestNetpulseHttpApi(HttpCase):
         super().setUpClass()
 
         technician_group = cls.env.ref("netpulse.group_netpulse_technician")
+        admin_group = cls.env.ref("netpulse.group_netpulse_admin")
+        cls.admin = cls.env["res.users"].create({
+            "name": "API Administrator",
+            "login": "api_admin",
+            "password": "ApiPassword123!",
+            "groups_id": [(6, 0, [admin_group.id])],
+        })
         cls.technician = cls.env["res.users"].create({
             "name": "API Technician",
             "login": "api_technician",
@@ -132,6 +139,42 @@ class TestNetpulseHttpApi(HttpCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"], "not_found")
+
+    def test_admin_can_update_incident_priority(self):
+        incident = self.env["netpulse.incident"].create({
+            "device_id": self.device.id,
+            "priority": "0",
+        })
+        login = self._login(login="api_admin")
+        self.assertEqual(login.status_code, 200)
+        token = login.json()["access_token"]
+
+        response = self._request(
+            "/api/v1/incidents/%s/priority" % incident.id,
+            token=token,
+            payload={"priority": "2"},
+            method="PATCH",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["priority"], "2")
+        self.assertEqual(incident.priority, "2")
+
+    def test_technician_cannot_update_incident_priority(self):
+        incident = self.env["netpulse.incident"].create({
+            "device_id": self.device.id,
+            "technician_id": self.technician.id,
+        })
+
+        response = self._request(
+            "/api/v1/incidents/%s/priority" % incident.id,
+            token=self._token(),
+            payload={"priority": "2"},
+            method="PATCH",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(incident.priority, "1")
 
     def test_technician_can_advance_own_incident(self):
         incident = self.env["netpulse.incident"].create({
