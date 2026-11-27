@@ -73,6 +73,10 @@ export class NetpulseApiClient {
         return this.request("/incidents");
     }
 
+    listDevices() {
+        return this.request("/devices");
+    }
+
     getIncident(id) {
         return this.request(`/incidents/${id}`);
     }
