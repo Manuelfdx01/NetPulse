@@ -70,9 +70,14 @@
                         <form t-on-submit.prevent="createIncident">
                             <div class="row g-2">
                                 <div class="col-md-3">
-                                    <label class="form-label">ID del dispositivo</label>
-                                    <input class="form-control" type="number" min="1"
-                                           t-model="state.deviceId" required="required"/>
+                                    <label class="form-label">Dispositivo</label>
+                                    <select class="form-select" t-model="state.deviceId" required="required">
+                                        <option value="">Seleccionar dispositivo</option>
+                                        <option t-foreach="state.devices" t-as="device"
+                                                t-key="device.id" t-att-value="device.id">
+                                            <t t-esc="device.name"/>
+                                        </option>
+                                    </select>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Causa raíz</label>
