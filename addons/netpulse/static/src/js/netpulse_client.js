@@ -14,6 +14,8 @@ export class NetpulseIncidentClient extends Component {
 
         this.selectIncident = this.selectIncident.bind(this);
         this.changeState = this.changeState.bind(this);
+        this.openCreateForm = this.openCreateForm.bind(this);
+        this.assignTechnician = this.assignTechnician.bind(this);
 
         onWillStart(() => this.loadIncidentsIfAuthenticated());
     }
@@ -64,12 +66,53 @@ export class NetpulseIncidentClient extends Component {
         }
     }
 
+    async openCreateForm() {
+        this.state.showCreateForm = !this.state.showCreateForm;
+        if (!this.state.showCreateForm || this.state.user.role !== "admin") {
+            return;
+        }
+        try {
+            const result = await api.listTechnicians();
+            this.state.technicians = result.items || [];
+        } catch (error) {
+            this.state.error = error.message;
+        }
+    }
+
+    async assignTechnician() {
+        if (!this.state.selectedIncident || !this.state.selectedTechnicianId) {
+            return;
+        }
+        this.state.submitting = true;
+        this.state.error = "";
+        this.state.notice = "";
+        try {
+            const incidentId = this.state.selectedIncident.id;
+            await api.assignTechnician(incidentId, this.state.selectedTechnicianId);
+            await this.selectIncident({ id: incidentId });
+            await this.loadIncidents();
+            await this.selectIncident({ id: incidentId });
+            this.state.notice = "El técnico se asignó correctamente.";
+        } catch (error) {
+            this.state.error = error.message;
+        } finally {
+            this.state.submitting = false;
+        }
+    }
+
     async selectIncident(incident) {
         this.state.error = "";
         this.state.notice = "";
         this.state.loading = true;
         try {
             this.state.selectedIncident = await api.getIncident(incident.id);
+            this.state.selectedTechnicianId = this.state.selectedIncident.technician_id
+                ? String(this.state.selectedIncident.technician_id[0])
+                : "";
+            if (this.state.user.role === "admin" && !this.state.technicians.length) {
+                const result = await api.listTechnicians();
+                this.state.technicians = result.items || [];
+            }
         } catch (error) {
             this.state.error = error.message;
             if (error.status === 401) {
@@ -89,10 +132,20 @@ export class NetpulseIncidentClient extends Component {
                 device_id: Number(this.state.deviceId),
                 description: this.state.description,
                 root_cause: this.state.rootCause,
+                ...(this.state.user.role === "admin"
+                    ? {
+                        priority: this.state.priority,
+                        ...(this.state.technicianId
+                            ? { technician_id: Number(this.state.technicianId) }
+                            : {}),
+                    }
+                    : {}),
             });
             this.state.deviceId = "";
             this.state.description = "";
             this.state.rootCause = "";
+            this.state.priority = "1";
+            this.state.technicianId = "";
             this.state.showCreateForm = false;
             this.state.notice = "La incidencia se creó correctamente.";
             await this.loadIncidents();
