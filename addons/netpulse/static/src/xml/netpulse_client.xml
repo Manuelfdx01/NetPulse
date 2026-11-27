@@ -78,6 +78,9 @@
                                             <t t-esc="device.name"/>
                                         </option>
                                     </select>
+                                    <small t-if="!state.devices.length" class="form-text text-muted">
+                                        No hay dispositivos activos disponibles. Registra un dispositivo antes de crear la incidencia.
+                                    </small>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Causa raíz</label>
@@ -113,7 +116,7 @@
                             </div>
                             <div class="mt-3 d-flex gap-2">
                                 <button class="btn btn-primary" type="submit"
-                                        t-att-disabled="state.submitting">
+                                        t-att-disabled="state.submitting || !state.deviceId">
                                     Crear
                                 </button>
                                 <button class="btn btn-secondary" type="button"
