@@ -10,6 +10,7 @@ test("la lista vacía produce el estado vacío", () => {
     const state = createInitialIncidentState();
 
     assert.equal(resolveIncidentListState(state), "empty");
+    assert.deepEqual(state.devices, []);
 });
 
 test("un error de red produce el estado de error", () => {
