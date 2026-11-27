@@ -3,7 +3,10 @@
 /** Cliente HTTP independiente de la interfaz OWL. */
 
 export class NetpulseApiClient {
-    constructor(baseUrl = "/api/v1", fetchImplementation = fetch) {
+    constructor(
+        baseUrl = "/api/v1",
+        fetchImplementation = globalThis.fetch.bind(globalThis)
+    ) {
         this.baseUrl = baseUrl;
         this.fetchImplementation = fetchImplementation;
         this.accessToken = null;
