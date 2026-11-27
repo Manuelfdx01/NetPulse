@@ -144,7 +144,13 @@
                                     <span t-elif="incident.state === 'in_progress'" class="badge text-bg-primary">En proceso</span>
                                     <span t-else="" class="badge text-bg-success">Resuelta</span>
                                 </div>
-                                <div><t t-esc="incident.device_id[1]"/></div>
+                                <div class="text-muted small"><t t-esc="incident.device_id[1]"/></div>
+                                <div class="mt-1">
+                                    <small class="text-muted">Prioridad: </small>
+                                    <span t-if="incident.priority === '0'" class="badge text-bg-secondary">Baja</span>
+                                    <span t-elif="incident.priority === '1'" class="badge text-bg-info">Media</span>
+                                    <span t-else="" class="badge text-bg-danger">Alta</span>
+                                </div>
                                 <small class="text-muted">
                                     <t t-esc="incident.root_cause or 'Sin causa raíz'"/>
                                 </small>
