@@ -72,9 +72,14 @@ export class NetpulseIncidentClient extends Component {
         if (!this.state.showCreateForm || this.state.user.role !== "admin") {
             return;
         }
+        this.state.error = "";
         try {
-            const result = await api.listTechnicians();
-            this.state.technicians = result.items || [];
+            const devicesResult = await api.listDevices();
+            this.state.devices = devicesResult.items || [];
+            if (this.state.user.role === "admin") {
+                const techniciansResult = await api.listTechnicians();
+                this.state.technicians = techniciansResult.items || [];
+            }
         } catch (error) {
             this.state.error = error.message;
         }
