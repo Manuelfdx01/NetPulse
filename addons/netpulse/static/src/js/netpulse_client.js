@@ -12,6 +12,9 @@ export class NetpulseIncidentClient extends Component {
     setup() {
         this.state = useState(createInitialIncidentState());
 
+        this.selectIncident = this.selectIncident.bind(this);
+        this.changeState = this.changeState.bind(this);
+
         onWillStart(() => this.loadIncidentsIfAuthenticated());
     }
 
