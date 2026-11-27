@@ -74,8 +74,10 @@
                                     <select class="form-select" t-model="state.deviceId" required="required">
                                         <option value="">Seleccionar dispositivo</option>
                                         <option t-foreach="state.devices" t-as="device"
-                                                t-key="device.id" t-att-value="device.id">
+                                                t-key="device.id" t-att-value="device.id"
+                                                t-att-disabled="device.open_incident_count > 0">
                                             <t t-esc="device.name"/>
+                                            <t t-if="device.open_incident_count > 0"> (ya tiene una incidencia abierta)</t>
                                         </option>
                                     </select>
                                     <small t-if="!state.devices.length" class="form-text text-muted">
