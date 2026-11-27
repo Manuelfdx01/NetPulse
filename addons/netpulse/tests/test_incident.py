@@ -72,3 +72,72 @@ class TestNetpulse(TransactionCase):
         self.assertEqual(incident.state, "pending")
         self.assertEqual(incident.origin, "manual")
         self.assertFalse(incident.date_resolved)
+
+    def test_device_recovery_posts_message_on_incident(self):
+        self.sw2.update_status(False)
+        incident = self.env["netpulse.incident"].search(
+            [("device_id", "=", self.sw2.id)], limit=1
+        )
+        messages_before = len(incident.message_ids)
+
+        self.sw2.update_status(True)
+
+        self.assertGreater(len(incident.message_ids), messages_before)
+
+    def test_incident_name_assigned_from_sequence(self):
+        self.sw2.update_status(False)
+        incident = self.env["netpulse.incident"].search(
+            [("device_id", "=", self.sw2.id)], limit=1
+        )
+
+        self.assertTrue(incident.name.startswith("INC-"))
+
+    def test_resolved_incident_cannot_reopen(self):
+        self.sw2.update_status(False)
+        incident = self.env["netpulse.incident"].search(
+            [("device_id", "=", self.sw2.id)], limit=1
+        )
+        incident.write({"technician_id": self.tech.id})
+        incident.action_start()
+        incident.action_resolve()
+
+        with self.assertRaises(ValidationError):
+            incident.write({"state": "in_progress"})
+
+    def test_duplicate_open_incident_raises_validation_error(self):
+        self.sw2.update_status(False)
+
+        with self.assertRaises(ValidationError):
+            self.env["netpulse.incident"].create({
+                "device_id": self.sw2.id,
+                "origin": "manual",
+                "priority": "1",
+            })
+
+    def test_priority_values_are_all_valid(self):
+        dev = self.env["netpulse.device"].create({
+            "name": "SW-priority-test",
+        })
+
+        for priority_value in ("0", "1", "2"):
+            incident = self.env["netpulse.incident"].create({
+                "device_id": dev.id,
+                "origin": "manual",
+                "priority": priority_value,
+            })
+
+            self.assertEqual(incident.priority, priority_value)
+
+            incident.write({"technician_id": self.tech.id})
+            incident.action_start()
+            incident.action_resolve()
+
+    def test_technician_cannot_modify_origin_on_incident(self):
+        self.sw2.update_status(False)
+        incident = self.env["netpulse.incident"].search(
+            [("device_id", "=", self.sw2.id)], limit=1
+        )
+        incident.write({"technician_id": self.tech.id})
+
+        with self.assertRaises(AccessError):
+            incident.with_user(self.tech).write({"origin": "manual"})
