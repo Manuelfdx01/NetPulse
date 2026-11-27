@@ -252,8 +252,11 @@ class NetpulseApiController(http.Controller):
             if not user.has_group(ADMIN_GROUP):
                 raise AccessError(_("Solo un administrador puede consultar los técnicos."))
             technicians = request.env["res.users"].sudo().search(
-                [("groups_id", "in", [request.env.ref(TECHNICIAN_GROUP).id]),
-                 ("active", "=", True)],
+                [
+                    ("groups_id", "in", [request.env.ref(TECHNICIAN_GROUP).id]),
+                    ("groups_id", "not in", [request.env.ref(ADMIN_GROUP).id]),
+                    ("active", "=", True),
+                ],
                 order="name",
             )
             return self._response({
@@ -281,7 +284,11 @@ class NetpulseApiController(http.Controller):
                 raise ValidationError(_("Debe indicar únicamente el técnico."))
             technician_id = payload["technician_id"]
             technician = request.env["res.users"].sudo().browse(technician_id).exists()
-            if not technician or not technician.has_group(TECHNICIAN_GROUP):
+            if (
+                not technician
+                or not technician.has_group(TECHNICIAN_GROUP)
+                or technician.has_group(ADMIN_GROUP)
+            ):
                 raise ValidationError(_("Seleccione un usuario con rol de técnico."))
             incident = request.env["netpulse.incident"].sudo().browse(incident_id).exists()
             if not incident:
