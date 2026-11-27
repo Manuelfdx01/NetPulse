@@ -16,6 +16,7 @@ export function createInitialIncidentState() {
         technicianId: "",
         technicians: [],
         selectedTechnicianId: "",
+        selectedPriority: "1",
         loading: false,
         submitting: false,
         error: "",
