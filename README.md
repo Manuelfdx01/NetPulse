@@ -31,8 +31,12 @@ docker compose up -d db
 docker compose run --rm odoo odoo -d netpulse -i netpulse --stop-after-init
 docker compose up -d
 ```
+
 Abra http://localhost:8069 e ingrese con `admin` (la base creada por línea de comandos usa la contraseña
 `admin`: **cámbiela de inmediato** en Preferencias → Seguridad de la cuenta).
+
+La lista de bases de datos está deshabilitada en `config/odoo.conf`; la inicialización y actualización
+del módulo se realizan mediante los comandos Docker documentados abajo.
 
 Para actualizar el módulo tras cambios de código:
 `docker compose run --rm odoo odoo -d netpulse -u netpulse --stop-after-init`
@@ -56,7 +60,6 @@ Para ejecutar solo las pruebas del cliente: `npm run test:client`.
 | Variable | Uso |
 |---|---|
 | `POSTGRES_USER`, `POSTGRES_PASSWORD` | Credenciales de PostgreSQL |
-| `ODOO_MASTER_PASSWORD` | Contraseña maestra de Odoo |
 | `NETPULSE_JWT_SECRET` | Secreto aleatorio de al menos 32 bytes para firmar JWT |
 | `GNS3_URL`, `GNS3_PROJECT_ID` | Servidor y proyecto GNS3 a monitorear |
 | `GNS3_USER`, `GNS3_PASSWORD` | Opcionales, si su GNS3 exige autenticación |
