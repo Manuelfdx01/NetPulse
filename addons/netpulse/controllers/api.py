@@ -142,7 +142,7 @@ class NetpulseApiController(http.Controller):
             devices = request.env["netpulse.device"].with_user(user)
             records = devices.search_read(
                 [("active", "=", True)],
-                ["name", "device_type", "criticality", "status"],
+                ["name", "device_type", "criticality", "status", "open_incident_count"],
                 order="name",
                 limit=500,
             )
