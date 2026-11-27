@@ -140,9 +140,9 @@
                                     t-on-click="() => selectIncident(incident)">
                                 <div class="d-flex justify-content-between">
                                     <strong><t t-esc="incident.name"/></strong>
-                                    <span class="badge text-bg-secondary">
-                                        <t t-esc="incident.state"/>
-                                    </span>
+                                    <span t-if="incident.state === 'pending'" class="badge text-bg-warning">Pendiente</span>
+                                    <span t-elif="incident.state === 'in_progress'" class="badge text-bg-primary">En proceso</span>
+                                    <span t-else="" class="badge text-bg-success">Resuelta</span>
                                 </div>
                                 <div><t t-esc="incident.device_id[1]"/></div>
                                 <small class="text-muted">
@@ -153,22 +153,50 @@
                     </div>
 
                     <div class="col-lg-5">
-                        <div t-if="state.selectedIncident" class="card">
+                        <div t-if="state.selectedIncident" class="card shadow-sm">
                             <div class="card-body">
-                                <h5><t t-esc="state.selectedIncident.name"/></h5>
-                                <p class="mb-1">
-                                    <strong>Dispositivo:</strong>
-                                    <t t-esc="state.selectedIncident.device_id[1]"/>
-                                </p>
-                                <p class="mb-1">
-                                    <strong>Prioridad:</strong>
-                                    <t t-esc="state.selectedIncident.priority"/>
-                                </p>
-                                <p class="mb-1">
-                                    <strong>Técnico:</strong>
-                                    <t t-esc="state.selectedIncident.technician_id ? state.selectedIncident.technician_id[1] : 'Sin asignar'"/>
-                                </p>
-                                <div t-if="state.user.role === 'admin'" class="mb-3">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <small class="text-muted">Detalle de incidencia</small>
+                                        <h5 class="mb-0"><t t-esc="state.selectedIncident.name"/></h5>
+                                    </div>
+                                    <span t-if="state.selectedIncident.state === 'pending'"
+                                          class="badge text-bg-warning">Pendiente</span>
+                                    <span t-elif="state.selectedIncident.state === 'in_progress'"
+                                          class="badge text-bg-primary">En proceso</span>
+                                    <span t-else="" class="badge text-bg-success">Resuelta</span>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Dispositivo</small>
+                                        <strong><t t-esc="state.selectedIncident.device_id[1]"/></strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Prioridad</small>
+                                        <strong t-if="state.selectedIncident.priority === '0'">Baja</strong>
+                                        <strong t-elif="state.selectedIncident.priority === '1'">Media</strong>
+                                        <strong t-else="">Alta</strong>
+                                    </div>
+                                    <div class="col-12">
+                                        <small class="text-muted d-block">Técnico asignado</small>
+                                        <strong><t t-esc="state.selectedIncident.technician_id ? state.selectedIncident.technician_id[1] : 'Sin asignar'"/></strong>
+                                    </div>
+                                </div>
+                                <div t-if="state.user.role === 'admin'" class="border-top pt-3 mb-3">
+                                    <h6 class="mb-2">Administrar incidencia</h6>
+                                    <label class="form-label">Cambiar prioridad</label>
+                                    <div class="input-group mb-3">
+                                        <select class="form-select" t-model="state.selectedPriority">
+                                            <option value="0">Baja</option>
+                                            <option value="1">Media</option>
+                                            <option value="2">Alta</option>
+                                        </select>
+                                        <button class="btn btn-outline-primary" type="button"
+                                                t-on-click="updatePriority"
+                                                t-att-disabled="state.submitting || state.selectedPriority === state.selectedIncident.priority">
+                                            Guardar prioridad
+                                        </button>
+                                    </div>
                                     <label class="form-label">Asignar técnico</label>
                                     <div class="input-group">
                                         <select class="form-select" t-model="state.selectedTechnicianId">
@@ -181,19 +209,18 @@
                                         <button class="btn btn-outline-primary" type="button"
                                                 t-on-click="assignTechnician"
                                                 t-att-disabled="state.submitting || !state.selectedTechnicianId">
-                                            Asignar
+                                            Asignar técnico
                                         </button>
                                     </div>
                                 </div>
-                                <p class="mb-1">
-                                    <strong>Estado:</strong>
-                                    <t t-esc="state.selectedIncident.state"/>
-                                </p>
-                                <p class="mb-3">
-                                    <strong>Descripción:</strong>
-                                    <t t-esc="state.selectedIncident.description or 'Sin descripción'"/>
-                                </p>
-                                <div class="d-flex gap-2">
+                                <div class="border-top pt-3 mb-3">
+                                    <small class="text-muted d-block mb-1">Descripción</small>
+                                    <p class="mb-0 text-break"><t t-esc="state.selectedIncident.description or 'Sin descripción'"/></p>
+                                    <small t-if="state.selectedIncident.root_cause" class="text-muted d-block mt-2">
+                                        Causa raíz: <t t-esc="state.selectedIncident.root_cause"/>
+                                    </small>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
                                     <button t-if="state.selectedIncident.state === 'pending'"
                                             class="btn btn-primary"
                                             t-on-click="() => changeState('in_progress')"
@@ -204,13 +231,13 @@
                                             class="btn btn-success"
                                             t-on-click="() => changeState('resolved')"
                                             t-att-disabled="state.submitting">
-                                        Resolver
+                                        Resolver incidencia
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div t-else="" class="alert alert-light border">
-                            Selecciona una incidencia para ver su detalle.
+                            Selecciona una incidencia para consultar sus detalles.
                         </div>
                     </div>
                 </div>
